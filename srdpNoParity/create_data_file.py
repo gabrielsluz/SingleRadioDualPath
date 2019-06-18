@@ -85,13 +85,15 @@ def create_data_file(nodes, merged, output, origin, destination):
         else:
             output.write(", " + str(nodes[i]))
     output.write(";\nset O := " + str(origin) + ";\n")
-    output.write("set D := "+ str(destination) +";\nparam: A: c1 c2 :=\n")
+    #output.write("set D := "+ str(destination) +";\nparam: A: c1 c2 :=\n")
+    output.write("set D := "+ str(destination) +";\nparam: A: c:=\n")
     keys = merged.keys()
     keys.sort(key=lambda x: (x[0], x[1]))
     for key in keys:
         value = merged[key]
         output.write(str(key[0]) + "," + str(key[1]) + " ")
-        output.write(str(value[0]) + " " + str(value[1]) + "\n")
+        #output.write(str(value[0]) + " " + str(value[1]) + "\n")
+	output.write(str(value[0]) + "\n")
     output.write(";\nend;")
 
 def grid_layout(G, width, height):

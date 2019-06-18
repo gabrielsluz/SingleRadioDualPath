@@ -30,7 +30,7 @@ do
     then
       if [ ! -e data/data_$i\_$j.dat ]
       then
-        python create_data_file.py -i ../../topologies/topology_$1 -o data/data_$i\_$j.dat -s $i -d $j
+        python create_data_file.py -i ../topologies/topology_$1 -o data/data_$i\_$j.dat -s $i -d $j
       fi
       if [ -e data/data_$i\_$j.dat ] && [ ! -e outputs/output_$i\_$j.txt ]
       then
