@@ -12,13 +12,12 @@ set E{i in N} := {j in N: (j,i) in A}; # Entrada
 # for{i in N} for {j in S[i]} printf "S[%d] %d\n", i,j;
 # for{i in N} for {j in E[i]} printf "E[%d] %d\n", i,j;
 
-param c1{A}; # Custo
-param c2{A};
+param c{A}; # Custo
 
 var x1{A}, binary;
 var x2{A}, binary;
 
-minimize obj: sum{(i,j) in A} (c1[i,j] * x1[i,j] + c2[i,j] * x2[i,j]);
+minimize obj: sum{(i,j) in A} (c[i,j] * x1[i,j] + c[i,j] * x2[i,j]);
 
 # Conservacao do Fluxo
 s.t. cons1O1{i in O}: sum{j in S[i]} x1[i,j] = 1;
@@ -37,5 +36,9 @@ s.t. cons2D2{i in D}: sum{j in E[i]} x1[j,i] = 1;
 s.t. umradio{i in NotD}: sum{j in E[i]} x1[j,i] + sum{j in E[i]} x2[j,i] <= 1;
 # Paridade
 s.t. paridade: sum{(i,j) in A} x1[i,j] - sum{(i,j) in A} x2[i,j] = 0;
+
+#Output para simulacao
+s.t. consSim1{(i,j) in A}: x1[i,j]*c[i,j] <= c[i,j];
+s.t. consSim2{(i,j) in A}: x2[i,j]*c[i,j] <= c[i,j];
 
 end;
