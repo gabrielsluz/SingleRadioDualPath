@@ -7,6 +7,11 @@ class Network:
     _source = 0
     _sink = 0
 
+    _num_paths = 0
+
+    _latency = 0
+    _throughput = 0.0
+
     def __init__(self, num_nodes, source, sink):
         _num_nodes = num_nodes
         for i in range(num_nodes):
@@ -26,14 +31,34 @@ class Network:
 
     def pick_path(self):
         #If the paths do not have same parity, delete the largest one
-        #If there is a one hop from source to sink and the cost of the one hop is smaller than the multi hop path -> delete the multi hop
+        #If there is a one hop from source to sink and the cost of the one hop is smaller than the multi hop path -> delete the multi hop and add another single hop
         first_path = self.get_path_length_and_etx(0)
         second_path = self.get_path_length_and_etx(1)
+
+        if first_path[0] % 2 != second_path[0] % 2:
+            if first_path[1] < second_path[1]:
+                self.delete_path(1)
+            else:
+                self.delete_path(0)
+            _num_paths = 1
+            return
+
+        if first_path[0] == 1 and  first_path[1] < second_path[1] :
+            self.delete_path(1)
+            self.add_edge(_source, _sink, first_path[1])
+        elif second_path[0] == 1 and  second_path[1] < first_path[1] :
+            self.delete_path(0)
+            self.add_edge(_source, _sink, first_path[1])
+
 
     def get_path_length_and_etx(self, path_num): #path_num = 1 or 0
         node = self._source
         path_length = 0
         path_etx = 0
+
+        if len(self._nodes[self._source]) <= 1 and path_num == 1:
+            tup = (0,0.0)
+            return tup
 
         while node != self._sink:
             if path_num == 1 and node == self._source:
@@ -46,6 +71,36 @@ class Network:
 
         tup = (path_length, path_etx)
         return tup
+
+    def delete_path(self, path_num):
+        if len(self._nodes[self._source]) <= 1
+            return
+
+        node = self._source
+        while node != self._sink:
+            if path_num == 1 and node == self._source:
+                edge = self._nodes[self._source][1]
+                self._nodes[self._source]pop(1)
+            else :
+                edge = self._nodes[node][0]
+                self._nodes[node].pop(0)
+            node = edge[0]
+
+    def send_from_source(self, transmission_list, last_path):
+
+
+
+    def simulate(self):
+        transmission_list = []
+        time = 0
+        msgs_received = 0
+        received_time = 0
+        last_path = 1
+
+        while True:
+
+
+
 
 
 
