@@ -31,6 +31,6 @@ s.t. cons1D2{i in D}: sum{j in E[i]} x[j,i] = 2;
 s.t. umradio{i in NotD}: sum{j in E[i]} x[j,i] <= 1;
 
 #Output para simulacao
-s.t. consSim{(i,j) in A}: x[i,j]*c[i,j] <= c[i,j];
+s.t. Sim{(i,j) in A}: x[i,j]*c[i,j] <= c[i,j];
 
 end;

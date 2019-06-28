@@ -38,7 +38,7 @@ s.t. umradio{i in NotD}: sum{j in E[i]} x1[j,i] + sum{j in E[i]} x2[j,i] <= 1;
 s.t. paridade: sum{(i,j) in A} x1[i,j] - sum{(i,j) in A} x2[i,j] = 0;
 
 #Output para simulacao
-s.t. consSim1{(i,j) in A}: x1[i,j]*c[i,j] <= c[i,j];
-s.t. consSim2{(i,j) in A}: x2[i,j]*c[i,j] <= c[i,j];
+s.t. Sim1{(i,j) in A}: x1[i,j]*c[i,j] <= c[i,j];
+s.t. Sim2{(i,j) in A}: x2[i,j]*c[i,j] <= c[i,j];
 
 end;

@@ -1,0 +1,8 @@
+  // cost: 0
+  // len: 0
+  uint8_t numPaths = 0;
+  uint8_t sourceNode = None;
+  uint8_t destinationNode = None;
+  uint8_t numHops = 0;
+  uint8_t hops[0][4] = {
+  };
