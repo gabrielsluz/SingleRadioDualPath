@@ -86,7 +86,8 @@ class Network:
                 self._nodes[node].pop(0)
             node = edge[0]
 
-    def send_from_source(self, transmission_list, last_path):
+    def get_new_transmissions(self, transmission_list):
+        
 
 
 
@@ -101,7 +102,9 @@ class Network:
             if time % 2 == 0:
                 #Check which transmissions ended in list 1, and make transmissions (decrement counter) in list 0
                 #Send from source to first path
-                
+                new_transmissions = []
+                trans_source = (_source, self._nodes[self._source][0][0], self._nodes[self._source][0][1])
+                new_transmissions.append(trans_source)
 
 
 
