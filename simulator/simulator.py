@@ -90,14 +90,18 @@ class Network:
 
 
 
+
     def simulate(self):
-        transmission_list = []
+        transmission_list0 = []
+        transmission_list1 = []
         time = 0
         msgs_received = 0
-        received_time = 0
-        last_path = 1
 
         while True:
+            if time % 2 == 0:
+                #Check which transmissions ended in list 1, and make transmissions (decrement counter) in list 0
+                #Send from source to first path
+                
 
 
 
