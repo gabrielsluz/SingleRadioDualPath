@@ -4,7 +4,7 @@ import sys
 class Network:
     _nodes = []
     _nodes_queue1 = []
-     _nodes_queue2 = []
+    _nodes_queue2 = []
     _num_nodes = 0
     _source = 0
     _sink = 0
@@ -14,15 +14,17 @@ class Network:
     _latency = 0
     _throughput = 0.0
 
+    _received_count = 0
+
     def __init__(self, num_nodes, source, sink):
-        _num_nodes = num_nodes
-        for i in range(num_nodes):
+        self._num_nodes = num_nodes + 1
+        for i in range(num_nodes+1):
             self._nodes_queue1.append(0)
             self._nodes_queue2.append(0)
             edges = []
             self._nodes.append(edges[:])
-        _source = source
-        _sink = sink
+        self._source = source
+        self._sink = sink
 
     def add_edge(self, tail, head, etx):
         tup = (head,etx)
@@ -40,20 +42,23 @@ class Network:
         first_path = self.get_path_length_and_etx(0)
         second_path = self.get_path_length_and_etx(1)
 
+        if first_path[0] == 1 :
+            if  first_path[1] < second_path[1] :
+                self.delete_path(1)
+                self.add_edge(self._source, self._sink, first_path[1])
+            elif second_path[1] < first_path[1] :
+                self.delete_path(0)
+                self.add_edge(self._source, self._sink, first_path[1])
+            return
+
+
         if first_path[0] % 2 != second_path[0] % 2:
             if first_path[1] < second_path[1]:
                 self.delete_path(1)
             else:
                 self.delete_path(0)
-            _num_paths = 1
+            self._num_paths = 1
             return
-
-        if first_path[0] == 1 and  first_path[1] < second_path[1] :
-            self.delete_path(1)
-            self.add_edge(_source, _sink, first_path[1])
-        elif second_path[0] == 1 and  second_path[1] < first_path[1] :
-            self.delete_path(0)
-            self.add_edge(_source, _sink, first_path[1])
 
 
     def get_path_length_and_etx(self, path_num): #path_num = 1 or 0
@@ -62,7 +67,7 @@ class Network:
         path_etx = 0
 
         if len(self._nodes[self._source]) <= 1 and path_num == 1:
-            tup = (0,0.0)
+            tup = (0,0)
             return tup
 
         while node != self._sink:
@@ -78,14 +83,14 @@ class Network:
         return tup
 
     def delete_path(self, path_num):
-        if len(self._nodes[self._source]) <= 1
+        if len(self._nodes[self._source]) <= 1:
             return
 
         node = self._source
         while node != self._sink:
             if path_num == 1 and node == self._source:
                 edge = self._nodes[self._source][1]
-                self._nodes[self._source]pop(1)
+                self._nodes[self._source].pop(1)
             else :
                 edge = self._nodes[node][0]
                 self._nodes[node].pop(0)
@@ -98,7 +103,7 @@ class Network:
                 new_tail = transmission_list[i][1]
                 new_head = self._nodes[new_tail][0][0]
                 new_etx = self._nodes[new_tail][0][1]
-                transmission = (new_tail, new_head, new_etx)
+                transmission = [new_tail, new_head, new_etx]
                 new_transmissions.append(transmission)
         return new_transmissions
 
@@ -123,44 +128,43 @@ class Network:
     def add_new_transmissions1(self, new_transmissions, transmission_list):
         for i in range(len(new_transmissions)):
             if self.is_transmission_happening(new_transmissions[i], transmission_list):
-                self._nodes_queue1[transmission[1]] += 1
+                self._nodes_queue1[new_transmissions[i][1]] += 1
             else:
                 transmission_list.append(new_transmissions[i])
 
     def add_new_transmissions2(self, new_transmissions, transmission_list):
         for i in range(len(new_transmissions)):
             if self.is_transmission_happening(new_transmissions[i], transmission_list):
-                self._nodes_queue2[transmission[1]] += 1
+                self._nodes_queue2[new_transmissions[i][1]] += 1
             else:
                 transmission_list.append(new_transmissions[i])
     
     def send_from_queues1(self, transmission_list):
-        for i in range(1, _num_nodes):
+        for i in range(1, self._num_nodes):
             if self._nodes_queue1[i] > 0:
                 tail = i
+                if tail == self._sink:
+                    continue
+
                 head = self._nodes[tail][0][0]
                 etx = self._nodes[tail][0][1]
-                transmission = (tail, head, etx)
+                transmission = [tail, head, etx]
                 if self.is_transmission_happening(transmission, transmission_list):
                     transmission_list.append(transmission)
                     self._nodes_queue1[i] -= 1
     
     def send_from_queues2(self, transmission_list):
-        for i in range(1, _num_nodes):
+        for i in range(1, self._num_nodes):
             if self._nodes_queue2[i] > 0:
                 tail = i
+                if tail == self._sink:
+                    continue
                 head = self._nodes[tail][0][0]
                 etx = self._nodes[tail][0][1]
-                transmission = (tail, head, etx)
+                transmission = [tail, head, etx]
                 if self.is_transmission_happening(transmission, transmission_list):
                     transmission_list.append(transmission)
                     self._nodes_queue2[i] -= 1
-
-            
-
-
-
-
 
 
     def simulate(self, max_time):
@@ -171,11 +175,12 @@ class Network:
 
         while time < max_time:
             if time % 2 == 0:
+                print transmission_list0
                 #Check which transmissions ended in list 1, and make transmissions (decrement counter) in list 0
                 #Send from source to first path
                 #Send from the nodes that can send now (have a packet in queue and are from this interval)
                 new_transmissions = []
-                trans_source = (_source, self._nodes[self._source][0][0], self._nodes[self._source][0][1])
+                trans_source = [self._source, self._nodes[self._source][0][0], self._nodes[self._source][0][1]]
                 new_transmissions.append(trans_source)
                 new_transmissions.extend(self.get_new_transmissions(transmission_list1))
 
@@ -183,11 +188,12 @@ class Network:
                 self.send_from_queues1(transmission_list0)
                 msgs_received += self.make_transmissions(transmission_list0)
             else:
+                print transmission_list1
                 #Check which transmissions ended in list 0, and make transmissions (decrement counter) in list 1
                 #Send from source to second path
                 #Send from the nodes that can send now (have a packet in queue and are from this interval)
                 new_transmissions = []
-                trans_source = (_source, self._nodes[self._source][1][0], self._nodes[self._source][1][1])
+                trans_source = [self._source, self._nodes[self._source][1][0], self._nodes[self._source][1][1]]
                 new_transmissions.append(trans_source)
                 new_transmissions.extend(self.get_new_transmissions(transmission_list0))
 
@@ -197,6 +203,7 @@ class Network:
 
             time += 1
         self._throughput = float(msgs_received )/ float(max_time)
+        self._received_count = msgs_received
 
 
 
@@ -230,7 +237,12 @@ for line in input_file:
 
 input_file.close()
 
+network.pick_path()
 network.print_network()
+
+network.simulate(12)
+
+print network._throughput, network._received_count
 
 """
 network = Network(10,0,5)
