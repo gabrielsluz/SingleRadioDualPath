@@ -6,7 +6,7 @@ do
   do
     if [ -e ../srdpNoParity/outputs/output_$i\_$j.txt ]
     then
-        python2.7 simulator.py 100 $i $j ../srdpNoParity/outputs/output_$i\_$j.txt
+        python2.7 simulator.py 100 $i $j ../srdpParity/outputs/output_$i\_$j.txt
     fi
     printf "\r $i $j"
   done

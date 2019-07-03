@@ -1,5 +1,5 @@
 import sys
-#Command line arguments -> Number of nodes, source, sink, glpsol file, output file
+#Command line arguments -> Number of nodes, source, sink, glpsol file
 
 class Network:
     _nodes = []
@@ -34,7 +34,7 @@ class Network:
             for j in range(len(self._nodes[i])):
                 print "{0} -> {1} = {2}".format(i, self._nodes[i][j][0], self._nodes[i][j][1])
 
-    def pick_path(self):
+    def pick_path(self, with_parity):
         #If the paths do not have same parity, delete the largest one
         #If there is a one hop from source to sink and the cost of the one hop is smaller than
         #the multi hop path -> delete the multi hop and add another single hop
@@ -45,10 +45,21 @@ class Network:
         if first_path[0] == 1 :
             if  first_path[1] < second_path[1] :
                 self.delete_path(1)
-                self.add_edge(self._source, self._sink, first_path[1])
-            elif second_path[1] < first_path[1] :
+                etx = first_path[1]
+                if with_parity:
+                    self.delete_path(0)
+                    etx /= 2
+                    self.add_edge(self._source, self._sink, etx)
+                self.add_edge(self._source, self._sink, etx)
+            elif second_path[1] <= first_path[1] :
                 self.delete_path(0)
-                self.add_edge(self._source, self._sink, first_path[1])
+                etx = first_path[1]
+                if with_parity:
+                    self.delete_path(0)
+                    etx /= 2
+                    self.add_edge(self._source, self._sink, etx)
+                self.add_edge(self._source, self._sink, etx)
+
             return
 
 
@@ -83,7 +94,7 @@ class Network:
         return tup
 
     def delete_path(self, path_num):
-        if len(self._nodes[self._source]) <= 1:
+        if len(self._nodes[self._source]) < 1 or (path_num == 1 and len(self._nodes[self._source]) == 1 ):
             return
 
         node = self._source
@@ -115,7 +126,7 @@ class Network:
 
     def make_transmissions(self, transmission_list):
         received_at_sink = 0
-        
+
         for i in range(len(transmission_list)):
             transmission_list[i][2] -= 1
             if transmission_list[i][2] <= 0:
@@ -130,7 +141,7 @@ class Network:
                 return True
         return False
 
-        
+
     def add_new_transmissions1(self, new_transmissions, transmission_list):
         for i in range(len(new_transmissions)):
             if self.is_transmission_happening(new_transmissions[i], transmission_list):
@@ -144,7 +155,7 @@ class Network:
                 self._nodes_queue2[new_transmissions[i][1]] += 1
             else:
                 transmission_list.append(new_transmissions[i])
-    
+
     def send_from_queues1(self, transmission_list):
         for i in range(1, self._num_nodes):
             if self._nodes_queue1[i] > 0:
@@ -158,7 +169,7 @@ class Network:
                 if self.is_transmission_happening(transmission, transmission_list):
                     transmission_list.append(transmission)
                     self._nodes_queue1[i] -= 1
-    
+
     def send_from_queues2(self, transmission_list):
         for i in range(1, self._num_nodes):
             if self._nodes_queue2[i] > 0:
@@ -171,11 +182,11 @@ class Network:
                 if self.is_transmission_happening(transmission, transmission_list):
                     transmission_list.append(transmission)
                     self._nodes_queue2[i] -= 1
-    
+
     def get_latency(self):
         first_path = self.get_path_length_and_etx(0)
         second_path = self.get_path_length_and_etx(1)
-        
+
         if first_path[1] > second_path[1]:
             return first_path[1]
         return second_path[1]
@@ -203,7 +214,7 @@ class Network:
                 self.send_from_queues1(transmission_list0)
                 #print "Transmisison list0\n"
                 #print transmission_list0
-                
+
 
             else:
                 #Check which transmissions ended in list 0, and make transmissions (decrement counter) in list 1
@@ -245,8 +256,10 @@ sink = int(sys.argv[3])
 input_file_name = sys.argv[4]
 
 if input_file_name[7] == 'P':
+    parity = True
     output_file_name = "Parity.txt"
 else:
+    parity = False
     output_file_name = "NoParity.txt"
 
 
@@ -265,7 +278,8 @@ for line in input_file:
 
 input_file.close()
 
-network.pick_path()
+network.pick_path(parity)
+
 #network.print_network()
 
 network.simulate(1000)
@@ -283,6 +297,7 @@ output_file = open("PathCost" + output_file_name, "a")
 output_file.write("{0}\n".format(network.get_latency()))
 
 output_file.close()
+
 
 """
 network = Network(10,0,5)

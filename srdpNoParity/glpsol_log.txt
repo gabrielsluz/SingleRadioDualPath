@@ -1,4 +1,4 @@
-GLPSOL: GLPK LP/MIP Solver, v4.64
+GLPSOL: GLPK LP/MIP Solver, v4.57
 Parameter(s) specified in the command line:
  -m shortest_paths_without_parity.mod -d data/data_100_99.dat -o outputs/output_100_99.txt
 Reading model section from shortest_paths_without_parity.mod...
@@ -15,7 +15,7 @@ Generating cons1D2...
 Generating umradio...
 Generating Sim...
 Model has been successfully generated
-GLPK Integer Optimizer, v4.64
+GLPK Integer Optimizer, v4.57
 2597 rows, 2441 columns, 12176 non-zeros
 2441 integer variables, all of which are binary
 Preprocessing...
@@ -27,17 +27,17 @@ Problem data seem to be well scaled
 Constructing initial basis...
 Size of triangular part is 151
 Solving LP relaxation...
-GLPK Simplex Optimizer, v4.64
+GLPK Simplex Optimizer, v4.57
 152 rows, 2391 columns, 7144 non-zeros
       0: obj =   1.800000000e+01 inf =   1.000e+00 (1)
       1: obj =   1.006900000e+04 inf =   0.000e+00 (0)
-*   137: obj =   3.300000000e+01 inf =   0.000e+00 (0)
+*   138: obj =   3.300000000e+01 inf =   0.000e+00 (0)
 OPTIMAL LP SOLUTION FOUND
 Integer optimization begins...
-+   137: mip =     not found yet >=              -inf        (1; 0)
-+   137: >>>>>   3.300000000e+01 >=   3.300000000e+01   0.0% (1; 0)
-+   137: mip =   3.300000000e+01 >=     tree is empty   0.0% (0; 1)
++   138: mip =     not found yet >=              -inf        (1; 0)
++   138: >>>>>   3.300000000e+01 >=   3.300000000e+01   0.0% (1; 0)
++   138: mip =   3.300000000e+01 >=     tree is empty   0.0% (0; 1)
 INTEGER OPTIMAL SOLUTION FOUND
 Time used:   0.0 secs
-Memory used: 7.1 Mb (7456882 bytes)
+Memory used: 7.1 Mb (7456954 bytes)
 Writing MIP solution to 'outputs/output_100_99.txt'...
