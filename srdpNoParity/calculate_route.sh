@@ -30,7 +30,7 @@ do
     then
       if [ ! -e data/data_$i\_$j.dat ]
       then
-        python create_data_file.py -i ../topologies/topology_$1 -o data/data_$i\_$j.dat -s $i -d $j
+        python2.7 create_data_file.py -i ../topologies/topology_$1 -o data/data_$i\_$j.dat -s $i -d $j
       fi
       if [ -e data/data_$i\_$j.dat ] && [ ! -e outputs/output_$i\_$j.txt ]
       then
@@ -38,7 +38,7 @@ do
       fi
       if [ -e outputs/output_$i\_$j.txt ] && [ ! -e routes/dual_$i\_$j.txt ]
       then
-        python create_route_file.py -i outputs/output_$i\_$j.txt -o routes/dual_$i\_$j.txt
+        python2.7 create_route_file.py -i outputs/output_$i\_$j.txt -o routes/dual_$i\_$j.txt
       fi
     fi
     printf "\r $i $j"

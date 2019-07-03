@@ -1,5 +1,5 @@
 import sys
-#Command line arguments -> Number of nodes, source, sink, glpsol output file
+#Command line arguments -> Number of nodes, source, sink, glpsol file, output file
 
 class Network:
     _nodes = []
@@ -9,9 +9,8 @@ class Network:
     _source = 0
     _sink = 0
 
-    _num_paths = 0
+    _num_paths = 2
 
-    _latency = 0
     _throughput = 0.0
 
     _received_count = 0
@@ -41,6 +40,7 @@ class Network:
         #the multi hop path -> delete the multi hop and add another single hop
         first_path = self.get_path_length_and_etx(0)
         second_path = self.get_path_length_and_etx(1)
+        #print first_path, second_path
 
         if first_path[0] == 1 :
             if  first_path[1] < second_path[1] :
@@ -98,23 +98,29 @@ class Network:
 
     def get_new_transmissions(self, transmission_list):
         new_transmissions = []
+        delete_list = []
         for i in range(len(transmission_list)):
             if transmission_list[i][2] <= 0:
-                new_tail = transmission_list[i][1]
-                new_head = self._nodes[new_tail][0][0]
-                new_etx = self._nodes[new_tail][0][1]
-                transmission = [new_tail, new_head, new_etx]
-                new_transmissions.append(transmission)
+                if transmission_list[i][1] != self._sink:
+                    new_tail = transmission_list[i][1]
+                    new_head = self._nodes[new_tail][0][0]
+                    new_etx = self._nodes[new_tail][0][1]
+                    transmission = [new_tail, new_head, new_etx]
+                    new_transmissions.append(transmission)
+                delete_list.append(i)
+        for i in range(len(delete_list)):
+            del transmission_list[delete_list[i]-i]
+
         return new_transmissions
 
     def make_transmissions(self, transmission_list):
         received_at_sink = 0
+        
         for i in range(len(transmission_list)):
             transmission_list[i][2] -= 1
             if transmission_list[i][2] <= 0:
                 if transmission_list[i][1] == self._sink:
                     received_at_sink += 1
-                del transmission_list[i]
 
         return received_at_sink
 
@@ -165,6 +171,14 @@ class Network:
                 if self.is_transmission_happening(transmission, transmission_list):
                     transmission_list.append(transmission)
                     self._nodes_queue2[i] -= 1
+    
+    def get_latency(self):
+        first_path = self.get_path_length_and_etx(0)
+        second_path = self.get_path_length_and_etx(1)
+        
+        if first_path[1] > second_path[1]:
+            return first_path[1]
+        return second_path[1]
 
 
     def simulate(self, max_time):
@@ -175,10 +189,11 @@ class Network:
 
         while time < max_time:
             if time % 2 == 0:
-                print transmission_list0
                 #Check which transmissions ended in list 1, and make transmissions (decrement counter) in list 0
                 #Send from source to first path
                 #Send from the nodes that can send now (have a packet in queue and are from this interval)
+                msgs_received += self.make_transmissions(transmission_list0)
+
                 new_transmissions = []
                 trans_source = [self._source, self._nodes[self._source][0][0], self._nodes[self._source][0][1]]
                 new_transmissions.append(trans_source)
@@ -186,24 +201,31 @@ class Network:
 
                 self.add_new_transmissions1(new_transmissions, transmission_list0)
                 self.send_from_queues1(transmission_list0)
-                msgs_received += self.make_transmissions(transmission_list0)
+                #print "Transmisison list0\n"
+                #print transmission_list0
+                
+
             else:
-                print transmission_list1
                 #Check which transmissions ended in list 0, and make transmissions (decrement counter) in list 1
                 #Send from source to second path
                 #Send from the nodes that can send now (have a packet in queue and are from this interval)
+                msgs_received += self.make_transmissions(transmission_list1)
+
                 new_transmissions = []
-                trans_source = [self._source, self._nodes[self._source][1][0], self._nodes[self._source][1][1]]
-                new_transmissions.append(trans_source)
+                if self._num_paths > 1:
+                    trans_source = [self._source, self._nodes[self._source][1][0], self._nodes[self._source][1][1]]
+                    new_transmissions.append(trans_source)
                 new_transmissions.extend(self.get_new_transmissions(transmission_list0))
 
                 self.add_new_transmissions2(new_transmissions, transmission_list1)
                 self.send_from_queues2(transmission_list1)
-                msgs_received += self.make_transmissions(transmission_list1)
+                #print "Transmisison list1\n"
+                #print transmission_list1
 
             time += 1
         self._throughput = float(msgs_received )/ float(max_time)
         self._received_count = msgs_received
+
 
 
 
@@ -222,6 +244,12 @@ source = int(sys.argv[2])
 sink = int(sys.argv[3])
 input_file_name = sys.argv[4]
 
+if input_file_name[7] == 'P':
+    output_file_name = "Parity.txt"
+else:
+    output_file_name = "NoParity.txt"
+
+
 network = Network(num_nodes, source, sink)
 
 input_file = open(input_file_name, "r")
@@ -238,11 +266,23 @@ for line in input_file:
 input_file.close()
 
 network.pick_path()
-network.print_network()
+#network.print_network()
 
-network.simulate(12)
+network.simulate(1000)
 
-print network._throughput, network._received_count
+#print network._throughput, network._received_count
+
+output_file = open("Throughput" + output_file_name, "a")
+
+output_file.write("{:f}\n".format(network._throughput))
+
+output_file.close()
+
+output_file = open("PathCost" + output_file_name, "a")
+
+output_file.write("{0}\n".format(network.get_latency()))
+
+output_file.close()
 
 """
 network = Network(10,0,5)
